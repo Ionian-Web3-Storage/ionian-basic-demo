@@ -9,8 +9,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@radix-ui/react-icons": "^1.1.1",
+    "@radix-ui/react-navigation-menu": "^1.0.0",
+    "@unocss/reset": "^0.45.5",
+    "@web3-react/core": "8.0.35-beta.0",
+    "@web3-react/metamask": "8.0.28-beta.0",
+    "classnames": "^2.3.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-use": "^17.4.0",
+    "zustand": "^4.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.15",

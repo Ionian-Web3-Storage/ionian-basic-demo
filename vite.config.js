@@ -8,6 +8,8 @@ export default defineConfig({
   plugins: [
     react(),
     Unocss({
+      safelist: [],
+      variants: [],
       shortcuts: [],
       rules: [],
       pressets: [presetWind()],
