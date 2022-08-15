@@ -1,10 +1,13 @@
 import { Nav } from "./component/Nav";
+import { IonianFileUploader } from "./component/IonianFileUploader";
+import { FileList } from "./component/FileList";
 
 function App() {
   return (
     <>
       <Nav />
-      <div>body</div>
+      <IonianFileUploader />
+      <FileList />
     </>
   );
 }

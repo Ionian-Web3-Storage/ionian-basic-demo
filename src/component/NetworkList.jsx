@@ -45,25 +45,15 @@ const chainList = [
 
 const useNetworkList = create((set, get) => ({
   cur: 0,
-  childHovering: chainList.map(() => false),
-  hovering: () => get().childHovering.filter((x) => !!x).length > 0,
-  setHovering: (idx, hovering) => {
-    const copy = get().childHovering.slice();
-    copy[idx] = hovering;
-    set({ childHovering: copy });
-  },
   setCurrent: (cur) => set({ cur }),
 }));
 
 const Trigger = forwardRef(
   ({ children, className, ...props }, forwardedRef) => {
-    const { hovering } = useNetworkList();
     return (
       <NavigationMenu.Trigger
         ref={forwardedRef}
-        className={cx(className, "flex flex-row items-center", {
-          "bg-#00dbff": hovering(),
-        })}
+        className={cx(className, "flex flex-row items-center")}
         {...props}
       >
         {children}
@@ -75,13 +65,9 @@ const Trigger = forwardRef(
 
 function OneNetwork({ idx, className, ...props }) {
   const { chainName } = chainList[idx];
-  const { setCurrent, setHovering } = useNetworkList();
+  const { setCurrent } = useNetworkList();
   const ref = useRef(null);
   const hovering = useHoverDirty(ref);
-
-  useEffect(() => {
-    setHovering(idx, hovering);
-  }, [hovering]);
 
   return (
     <NavigationMenu.Item
@@ -100,12 +86,8 @@ function OneNetwork({ idx, className, ...props }) {
 
 export function NetworkList({ className, ...props }) {
   const { cur } = useNetworkList();
-  const { hovering } = useNetworkList();
   return (
-    <NavigationMenu.Item
-      {...props}
-      className={cx(className, { "bg-#00dbff": hovering() })}
-    >
+    <NavigationMenu.Item {...props} className={cx(className)}>
       <Trigger>{chainList[cur].chainName}</Trigger>
       <NavigationMenu.Content className="w-screen absolute -mt-4">
         <NavigationMenu.Sub value={chainList[cur].chainName}>

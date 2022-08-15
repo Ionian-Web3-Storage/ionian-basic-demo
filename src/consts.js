@@ -9,3 +9,5 @@ export const TARGET_CHAIN = {
     decimals: 18,
   },
 };
+
+export const CLIENT_ENDPOINT = import.meta.env.LOCAL_CLIENT_ENDPOINT;

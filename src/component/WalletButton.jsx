@@ -36,11 +36,14 @@ export function WalletButton({ className, ...props }) {
 
   const onClick = useCallback(() => {
     if (isActivating) return;
-    if (!isActive || wrongChain) return connect();
+    if (!isActive || wrongChain)
+      // NOTE: bug fix, web3-react failed to detect connection after network switch
+      return connect()
+        .then(() => window.ethereum.request({ method: "eth_accounts" }))
+        .then((x) => {
+          if (Array.isArray(x) && x.length > 0) setTimeout(connect, 600);
+        });
   }, [isActivating, wrongChain, isActive]);
-
-  // NOTE: bug fix, web3-react failed to detect connection after network switch
-  useInterval(connect, !isActive && window.ethereum.isConnected() ? 100 : null);
 
   return (
     <button
