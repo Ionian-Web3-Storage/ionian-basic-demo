@@ -4,10 +4,11 @@ import { CLIENT_ENDPOINT, CONTRACT_ABI, CONTRACT_ADDRESS } from "../consts";
 import { hooks } from "../connectors/metaMask";
 import { useEffect } from "react";
 import { Contract } from "@ethersproject/contracts";
+import { useFileList } from "./FileList";
+import { useEffectOnce } from "react-use";
 
 const { useProvider } = hooks;
 const contract = new Contract(CONTRACT_ADDRESS, CONTRACT_ABI);
-let STORE;
 
 // state
 // 0 init
@@ -21,20 +22,34 @@ const useIonianFileUploaderStore = create((set, get) => ({
   name: null,
   root: null,
   size: null,
+  date: null,
   segments: null,
   provider: null,
   fileIonianStatus: null,
+
   updateStatusInterval: null,
+
+  upsertFileFn: null,
+  setUpsertFile: (fn) => set({ upsertFileFn: fn }),
+
+  getFileForList: () => {
+    const { state, name, root, size, date, segments, fileIonianStatus } = get();
+    return { state, name, root, size, date, segments, fileIonianStatus };
+  },
+
   setProvider: (provider) => set({ provider }),
+
   addFile: (fileName) => {
     if (get().state !== 0)
       return console.warn(`Can't add file at state: ${get().state}`);
     if (!fileName) throw new Error(`Invalid file name: ${fileName}`);
     set({ name: fileName, state: 1 });
-    fetch(`${CLIENT_ENDPOINT}/local/file?path=${fileName}`).then((res) =>
-      res.json()
-    );
+    fetch(`${CLIENT_ENDPOINT}/local/file?path=${fileName}`, { mode: "cors" })
+      .then((res) => res.json())
+      .then((x) => x.data)
+      .then(get().addFileInfo);
   },
+
   addFileInfo: ({ name, root, size, segments }) => {
     if (get().state !== 1)
       return console.warn(`Can't add file info at state: ${get().state}`);
@@ -46,24 +61,33 @@ const useIonianFileUploaderStore = create((set, get) => ({
       .then(() => get().txSent());
     // }
   },
+
   txSent: () => {
     if (get().state !== 2)
       return console.warn(`Can't get on chain state at state: ${get().state}`);
-    set({ state: 3 });
-    set({ updateStatusInterval: setInterval(get().updateFileStatus, 3000) });
+    set({
+      date: new Date().getTime(),
+      state: 3,
+      updateStatusInterval: setInterval(get().updateFileStatus, 3000),
+    });
+    get().upsertFileFn(get().getFileForList());
   },
+
   fileStatusAvaliable: () => {
     set({ fileIonianStatus: "available", state: 4 });
-    fetch({
-      url: `${CLIENT_ENDPOINT}/local/upload`,
+    get().upsertFileFn(get().getFileForList());
+    fetch(`${CLIENT_ENDPOINT}/local/upload`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ path: get().name, node: 0 }),
     });
   },
+
   fileUploaded: () => {
     set({ fileIonianStatus: "uploaded", state: 5 });
+    get().upsertFileFn(get().getFileForList());
   },
+
   setFileStatus: (status) => {
     const curStatus = get().fileIonianStatus;
     if (status === "unavailable") return set({ fileIonianStatus: status });
@@ -77,9 +101,16 @@ const useIonianFileUploaderStore = create((set, get) => ({
       curStatus === "available" &&
       status === "finalized" &&
       get().state === 4
-    )
+    ) {
+      if (get().updateStatusInterval) {
+        clearInterval(get().updateStatusInterval);
+        set({ updateStatusInterval: null });
+      }
       return get().fileUploaded();
+    }
   },
+
+  // update file on change status
   updateFileStatus: () => {
     if (get().state !== 3 && get().state !== 4) {
       if (get().updateStatusInterval) {
@@ -88,9 +119,11 @@ const useIonianFileUploaderStore = create((set, get) => ({
       }
     }
     fetch(`${CLIENT_ENDPOINT}/local/status?root=${get().root}`)
-      .then((res) => res.text())
-      .then(setFileStatus);
+      .then((res) => res.json())
+      .then((x) => x.data)
+      .then(get().setFileStatus);
   },
+
   reset: () => {
     if (get().updateStatusInterval) clearInterval(get().updateStatusInterval);
     set({
@@ -99,6 +132,7 @@ const useIonianFileUploaderStore = create((set, get) => ({
       root: null,
       size: null,
       segments: null,
+      date: null,
       updateStatusInterval: null,
     });
   },
@@ -106,23 +140,28 @@ const useIonianFileUploaderStore = create((set, get) => ({
 
 export function useIonianFileUploader() {
   const provider = useProvider();
-  STORE = STORE || useIonianFileUploaderStore();
+  const store = useIonianFileUploaderStore();
+  const fileList = useFileList();
 
   useEffect(() => {
-    if (provider) STORE.setProvider(provider);
+    if (provider) store.setProvider(provider);
   }, [provider]);
+
+  useEffectOnce(() => {
+    store.setUpsertFile(fileList.upsertFile);
+  });
 
   const { fileName, reset } = useFileUploader();
 
   useEffect(() => {
-    if (fileName) STORE.addFile(fileName);
+    if (fileName) store.addFile(fileName);
     else {
-      STORE.reset();
+      store.reset();
       reset();
     }
   }, [fileName]);
 
-  return STORE;
+  return store;
 }
 
 export function IonianFileUploader(props) {

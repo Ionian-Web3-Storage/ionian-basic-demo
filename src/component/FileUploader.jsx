@@ -14,6 +14,8 @@ const uppy = new uppycore({
   },
 });
 
+if (import.meta.env.NODE_ENV !== "production") uppy.reset();
+
 export const useFileUploader = create((set) => ({
   base64: null,
   fileName: null,
@@ -37,7 +39,7 @@ uppy.on("file-removed", useFileUploader.getState().fileRemoved);
 
 export function FileUploader({ className, ...props }) {
   return (
-    <>
+    <div className="w-70% m-auto">
       <link
         rel="stylesheet"
         type="text/css"
@@ -57,13 +59,13 @@ export function FileUploader({ className, ...props }) {
         disableInformer
         fileManagerSelectionType="files"
         uppy={uppy}
-        width="50%"
+        width="100%"
         height="16rem"
         proudlyDisplayPoweredByUppy={false}
         theme="light"
         {...props}
-        className={cx(className, "translate-x-1/4")}
+        className={cx(className, "")}
       />
-    </>
+    </div>
   );
 }
