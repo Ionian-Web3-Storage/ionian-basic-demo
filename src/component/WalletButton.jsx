@@ -28,9 +28,9 @@ export function WalletButton({ className, ...props }) {
   });
 
   const text = useMemo(() => {
-    if (wrongChain) return `Switch to ${TARGET_CHAIN.chainName}`;
-    if (isActivating) return "Connecting";
     if (!isActive) return "Connect Wallet";
+    if (isActivating) return "Connecting";
+    if (wrongChain) return `Switch to ${TARGET_CHAIN.chainName}`;
     return shortenAddr(ensName?.[0] || accounts?.[0]);
   }, [isActivating, isActive, wrongChain, ensName?.[0], accounts?.[0]]);
 

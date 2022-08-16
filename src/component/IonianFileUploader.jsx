@@ -1,10 +1,13 @@
 import { useFileUploader, FileUploader } from "./FileUploader";
 import create from "zustand";
-import { CLIENT_ENDPOINT } from "../consts";
+import { CLIENT_ENDPOINT, CONTRACT_ABI, CONTRACT_ADDRESS } from "../consts";
 import { hooks } from "../connectors/metaMask";
 import { useEffect } from "react";
+import { Contract } from "@ethersproject/contracts";
 
 const { useProvider } = hooks;
+const contract = new Contract(CONTRACT_ADDRESS, CONTRACT_ABI);
+let STORE;
 
 // state
 // 0 init
@@ -22,9 +25,10 @@ const useIonianFileUploaderStore = create((set, get) => ({
   provider: null,
   fileIonianStatus: null,
   updateStatusInterval: null,
+  setProvider: (provider) => set({ provider }),
   addFile: (fileName) => {
     if (get().state !== 0)
-      throw new Error(`Can't add file at state: ${get().state}`);
+      return console.warn(`Can't add file at state: ${get().state}`);
     if (!fileName) throw new Error(`Invalid file name: ${fileName}`);
     set({ name: fileName, state: 1 });
     fetch(`${CLIENT_ENDPOINT}/local/file?path=${fileName}`).then((res) =>
@@ -33,17 +37,18 @@ const useIonianFileUploaderStore = create((set, get) => ({
   },
   addFileInfo: ({ name, root, size, segments }) => {
     if (get().state !== 1)
-      throw new Error(`Can't add file at state: ${get().state}`);
+      return console.warn(`Can't add file info at state: ${get().state}`);
     set({ state: 2, root, size, segments, name });
-    if (false) {
-      ethereum
-        .request({ method: "eth_sendTransaction", params: {} })
-        .then(() => get().txSent());
-    }
+    // if (false) {
+    contract
+      .connect(get().provider.getSigner())
+      .appendLog(get().root, get().size)
+      .then(() => get().txSent());
+    // }
   },
   txSent: () => {
     if (get().state !== 2)
-      throw new Error(`Can't add file at state: ${get().state}`);
+      return console.warn(`Can't get on chain state at state: ${get().state}`);
     set({ state: 3 });
     set({ updateStatusInterval: setInterval(get().updateFileStatus, 3000) });
   },
@@ -101,25 +106,53 @@ const useIonianFileUploaderStore = create((set, get) => ({
 
 export function useIonianFileUploader() {
   const provider = useProvider();
-  const store = useIonianFileUploaderStore();
+  STORE = STORE || useIonianFileUploaderStore();
 
   useEffect(() => {
-    if (provider) store.setProvider(provider);
+    if (provider) STORE.setProvider(provider);
   }, [provider]);
 
   const { fileName, reset } = useFileUploader();
 
   useEffect(() => {
-    if (fileName) store.addFile(fileName);
+    if (fileName) STORE.addFile(fileName);
     else {
-      store.reset();
+      STORE.reset();
       reset();
     }
   }, [fileName]);
 
-  return store;
+  return STORE;
 }
 
 export function IonianFileUploader(props) {
-  return <FileUploader {...props} />;
+  const store = useIonianFileUploader();
+
+  return (
+    <>
+      <FileUploader {...props} />
+
+      <section>
+        <p>-----------------------DEBUG INFO-----------------------</p>
+        <p>
+          // state <br />
+          // 0 init <br />
+          // 1 file added, getting merkle root <br />
+          // 2 got merkle root, request sending tx <br />
+          // 3 tx sent, waiting for confirmation <br />
+          // 4 tx confirmed, uploading file <br />
+          // 5 file uploaded <br />
+        </p>
+        <ul className="p-4 ml-16">
+          <li>state: {store.state}</li>
+          <li>name: {store.name}</li>
+          <li>root: {store.root}</li>
+          <li>size: {store.size}</li>
+          <li>segments: {store.segments}</li>
+          <li>fileIonianStatus: {store.fileIonianStatus}</li>
+        </ul>
+        <p>-----------------------DEBUG INFO-----------------------</p>
+      </section>
+    </>
+  );
 }

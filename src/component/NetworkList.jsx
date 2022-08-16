@@ -2,7 +2,7 @@ import * as NavigationMenu from "@radix-ui/react-navigation-menu";
 import { TARGET_CHAIN } from "../consts";
 import create from "zustand";
 import { CaretDownIcon } from "@radix-ui/react-icons";
-import { forwardRef, useRef, useEffect } from "react";
+import { forwardRef, useRef } from "react";
 import cx from "classnames";
 import { useHoverDirty } from "react-use";
 
@@ -43,7 +43,7 @@ const chainList = [
   },
 ];
 
-const useNetworkList = create((set, get) => ({
+const useNetworkList = create((set) => ({
   cur: 0,
   setCurrent: (cur) => set({ cur }),
 }));
@@ -89,7 +89,7 @@ export function NetworkList({ className, ...props }) {
   return (
     <NavigationMenu.Item {...props} className={cx(className)}>
       <Trigger>{chainList[cur].chainName}</Trigger>
-      <NavigationMenu.Content className="w-screen absolute -mt-4">
+      <NavigationMenu.Content className="w-screen absolute -mt-4 z-2001 bg-white">
         <NavigationMenu.Sub value={chainList[cur].chainName}>
           <NavigationMenu.List>
             {chainList.map((_, idx) => (

@@ -1,6 +1,7 @@
 import uppycore from "@uppy/core";
 import create from "zustand";
 import { Dashboard } from "@uppy/react";
+import cx from "classnames";
 
 const uppy = new uppycore({
   id: "default",
@@ -34,7 +35,7 @@ export const useFileUploader = create((set) => ({
 uppy.on("file-added", useFileUploader.getState().fileAdded);
 uppy.on("file-removed", useFileUploader.getState().fileRemoved);
 
-export function FileUploader(props) {
+export function FileUploader({ className, ...props }) {
   return (
     <>
       <link
@@ -56,11 +57,12 @@ export function FileUploader(props) {
         disableInformer
         fileManagerSelectionType="files"
         uppy={uppy}
-        width="100%"
+        width="50%"
         height="16rem"
         proudlyDisplayPoweredByUppy={false}
         theme="light"
         {...props}
+        className={cx(className, "translate-x-1/4")}
       />
     </>
   );

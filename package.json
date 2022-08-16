@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ethersproject/contracts": "^5.6.2",
+    "@radix-ui/react-accordion": "^1.0.0",
     "@radix-ui/react-icons": "^1.1.1",
     "@radix-ui/react-navigation-menu": "^1.0.0",
     "@unocss/reset": "^0.45.5",

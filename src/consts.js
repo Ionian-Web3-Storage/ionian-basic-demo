@@ -10,4 +10,27 @@ export const TARGET_CHAIN = {
   },
 };
 
-export const CLIENT_ENDPOINT = import.meta.env.LOCAL_CLIENT_ENDPOINT;
+export const CLIENT_ENDPOINT = import.meta.env.VITE_LOCAL_CLIENT_ENDPOINT;
+
+export const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
+export const CONTRACT_ABI = [
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "dataRoot",
+        type: "bytes32",
+      },
+      {
+        internalType: "uint256",
+        name: "sizeBytes",
+        type: "uint256",
+      },
+    ],
+    name: "appendLog",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  ,
+];
