@@ -5,6 +5,7 @@ import presetWind from "@unocss/preset-wind";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: "/ionian-basic-demo/",
   plugins: [
     react(),
     Unocss({
