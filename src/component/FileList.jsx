@@ -4,6 +4,7 @@ import cx from "classnames";
 import * as Accordion from "@radix-ui/react-accordion";
 import { useEffect } from "react";
 import { TARGET_CHAIN } from "../consts";
+import { useCopyToClipboard } from "react-use";
 
 import { CLIENT_ENDPOINT } from "../consts";
 
@@ -82,9 +83,15 @@ function shortenBytes(n) {
 }
 
 function MerkleRoot({ children, className, ...props }) {
+  const [, copy] = useCopyToClipboard();
   return (
-    <div className={cx(className)} {...props}>
-      {`0x${children.substring(2, 8)}...${children.substring(58, 66)}`}
+    <div {...props} className={cx(className, "flex flex-row")}>
+      <span>
+        {`0x${children.substring(2, 8)}...${children.substring(58, 66)}`}
+      </span>
+      <button className="z-20" onClick={() => copy(children)}>
+        <img className="ml-1 w-3" src="./copy.svg" />
+      </button>
     </div>
   );
 }
