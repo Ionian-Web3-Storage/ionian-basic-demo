@@ -76,7 +76,8 @@ function OneNetwork({ idx, className, ...props }) {
       key={idx}
       value={chainName}
       className={cx(className, "text-right text-lg py-4 pr-10%", {
-        "bg-#00dbff": hovering,
+        "bg-black": hovering,
+        "text-white": hovering,
       })}
     >
       <button onClick={() => setCurrent(idx)}>{chainName}</button>
