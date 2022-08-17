@@ -8,8 +8,17 @@ import { TARGET_CHAIN } from "../consts";
 const { useChainId, useAccounts, useIsActivating, useIsActive, useENSNames } =
   hooks;
 
-function connect() {
+export function connect() {
   return metaMask.activate(TARGET_CHAIN);
+}
+
+export function useChainIsOk() {
+  const isActive = useIsActive();
+  const isActivating = useIsActivating();
+  const chainId = useChainId();
+  const wrongChain = chainId !== parseInt(TARGET_CHAIN.chainId, 10);
+
+  return isActive && !wrongChain && !isActivating;
 }
 
 export function WalletButton({ className, ...props }) {

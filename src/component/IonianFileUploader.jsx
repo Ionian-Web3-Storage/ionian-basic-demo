@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { Contract } from "@ethersproject/contracts";
 import { useFileList } from "./FileList";
 import { useNodes } from "./NodeList";
+import { useChainIsOk, connect } from "./WalletButton";
 
 const { useProvider } = hooks;
 const contract = new Contract(CONTRACT_ADDRESS, CONTRACT_ABI);
@@ -166,5 +167,17 @@ export function useIonianFileUploader() {
 
 export function IonianFileUploader(props) {
   useIonianFileUploader();
-  return <FileUploader {...props} />;
+  const chainOK = useChainIsOk();
+  return (
+    <FileUploader
+      {...props}
+      onClick={(e) => {
+        if (!chainOK) {
+          connect();
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }}
+    />
+  );
 }
