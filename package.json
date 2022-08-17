@@ -31,6 +31,7 @@
     "@types/react-dom": "^18.0.6",
     "@unocss/preset-wind": "^0.45.5",
     "@vitejs/plugin-react": "^2.0.0",
+    "nodemon": "^2.0.19",
     "unocss": "^0.45.5",
     "vite": "^3.0.0"
   }
