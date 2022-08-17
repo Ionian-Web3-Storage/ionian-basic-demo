@@ -222,7 +222,7 @@ export function FileList({ className, ...props }) {
           <div className="col-span-1" />
         </div>
         <Accordion.Root {...props} type="single" value={expanded + ""}>
-          {files.map((file, idx) => (
+          {files.reverse().map((file, idx) => (
             <OneFile key={idx} idx={idx} {...file} />
           ))}
         </Accordion.Root>
