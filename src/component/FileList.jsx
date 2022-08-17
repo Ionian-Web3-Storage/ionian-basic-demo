@@ -9,7 +9,7 @@ import { useNodes } from "./NodeList";
 
 import { CLIENT_ENDPOINT } from "../consts";
 
-const useFileListStore = create(
+export const useFileListStore = create(
   persist(
     (set, get) => ({
       expanded: null,

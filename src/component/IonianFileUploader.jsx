@@ -4,7 +4,7 @@ import { CLIENT_ENDPOINT, CONTRACT_ABI, CONTRACT_ADDRESS } from "../consts";
 import { hooks } from "../connectors/metaMask";
 import { useEffect } from "react";
 import { Contract } from "@ethersproject/contracts";
-import { useFileList } from "./FileList";
+import { useFileListStore } from "./FileList";
 import { useNodes } from "./NodeList";
 import { useChainIsOk, connect } from "./WalletButton";
 
@@ -29,9 +29,6 @@ const useIonianFileUploaderStore = create((set, get) => ({
   fileIonianStatus: null,
 
   updateStatusInterval: null,
-
-  upsertFileFn: null,
-  setUpsertFile: (fn) => set({ upsertFileFn: fn }),
 
   getFileForList: () => {
     const { state, name, root, size, date, segments, fileIonianStatus } = get();
@@ -71,12 +68,12 @@ const useIonianFileUploaderStore = create((set, get) => ({
       state: 3,
       updateStatusInterval: setInterval(get().updateFileStatus, 3000),
     });
-    useFileList.getState().upsertFile(get().getFileForList());
+    useFileListStore.getState().upsertFile(get().getFileForList());
   },
 
   fileStatusAvaliable: () => {
     set({ fileIonianStatus: "available", state: 4 });
-    get().upsertFileFn(get().getFileForList());
+    useFileListStore.getState().upsertFile(get().getFileForList());
     fetch(`${CLIENT_ENDPOINT}/local/upload`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -89,7 +86,7 @@ const useIonianFileUploaderStore = create((set, get) => ({
 
   fileUploaded: () => {
     set({ fileIonianStatus: "uploaded", state: 5 });
-    get().upsertFileFn(get().getFileForList());
+    useFileListStore.getState().upsertFile(get().getFileForList());
     get().reset();
   },
 
