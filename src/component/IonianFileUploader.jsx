@@ -5,7 +5,7 @@ import { hooks } from "../connectors/metaMask";
 import { useEffect } from "react";
 import { Contract } from "@ethersproject/contracts";
 import { useFileList } from "./FileList";
-import { useEffectOnce } from "react-use";
+import { useNodes } from "./NodeList";
 
 const { useProvider } = hooks;
 const contract = new Contract(CONTRACT_ADDRESS, CONTRACT_ABI);
@@ -31,9 +31,6 @@ const useIonianFileUploaderStore = create((set, get) => ({
 
   upsertFileFn: null,
   setUpsertFile: (fn) => set({ upsertFileFn: fn }),
-
-  uppyResetFn: null,
-  setUppyResetFn: (fn) => set({ uppyResetFn: fn }),
 
   getFileForList: () => {
     const { state, name, root, size, date, segments, fileIonianStatus } = get();
@@ -73,7 +70,7 @@ const useIonianFileUploaderStore = create((set, get) => ({
       state: 3,
       updateStatusInterval: setInterval(get().updateFileStatus, 3000),
     });
-    get().upsertFileFn(get().getFileForList());
+    useFileList.getState().upsertFile(get().getFileForList());
   },
 
   fileStatusAvaliable: () => {
@@ -82,7 +79,10 @@ const useIonianFileUploaderStore = create((set, get) => ({
     fetch(`${CLIENT_ENDPOINT}/local/upload`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path: get().name, node: 0 }),
+      body: JSON.stringify({
+        path: get().name,
+        node: useNodes.getState().getCurrentNode(),
+      }),
     });
   },
 
@@ -130,7 +130,7 @@ const useIonianFileUploaderStore = create((set, get) => ({
 
   reset: () => {
     if (get().updateStatusInterval) clearInterval(get().updateStatusInterval);
-    get().uppyResetFn();
+    useFileUploader.getState().reset();
     set({
       state: 0,
       name: null,
@@ -146,24 +146,18 @@ const useIonianFileUploaderStore = create((set, get) => ({
 export function useIonianFileUploader() {
   const provider = useProvider();
   const store = useIonianFileUploaderStore();
-  const fileList = useFileList();
 
   useEffect(() => {
     if (provider) store.setProvider(provider);
   }, [provider]);
 
-  const { fileName, reset } = useFileUploader();
-
-  useEffectOnce(() => {
-    store.setUpsertFile(fileList.upsertFile);
-    store.setUppyResetFn(reset);
-  });
+  const { fileName } = useFileUploader();
 
   useEffect(() => {
     if (fileName) store.addFile(fileName);
     else {
       store.reset();
-      reset();
+      useFileUploader.getState().reset();
     }
   }, [fileName]);
 
@@ -171,5 +165,6 @@ export function useIonianFileUploader() {
 }
 
 export function IonianFileUploader(props) {
+  useIonianFileUploader();
   return <FileUploader {...props} />;
 }

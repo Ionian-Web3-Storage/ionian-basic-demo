@@ -1,3 +1,10 @@
 :root {
   font-size: 16px;
 }
+button:focus {
+  outline: unset;
+}
+
+.hidden {
+  display: none;
+}

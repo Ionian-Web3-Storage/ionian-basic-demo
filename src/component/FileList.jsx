@@ -5,6 +5,7 @@ import * as Accordion from "@radix-ui/react-accordion";
 import { useEffect } from "react";
 import { TARGET_CHAIN } from "../consts";
 import { useCopyToClipboard } from "react-use";
+import { useNodes } from "./NodeList";
 
 import { CLIENT_ENDPOINT } from "../consts";
 
@@ -105,7 +106,11 @@ function Download({ name, root, className, ...props }) {
         fetch(`${CLIENT_ENDPOINT}/local/download`, {
           method: "POST",
           mode: "cors",
-          body: JSON.stringify({ node: 0, root, path: `~/Downloads/${name}` }),
+          body: JSON.stringify({
+            node: useNodes.getState().getCurrentNode(),
+            root,
+            path: `~/Downloads/${name}`,
+          }),
         })
       }
     >
