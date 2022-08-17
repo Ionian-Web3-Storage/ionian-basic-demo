@@ -107,7 +107,7 @@ function Download({ name, root, className, ...props }) {
           method: "POST",
           mode: "cors",
           body: JSON.stringify({
-            node: useNodes.getState().getCurrentNode(),
+            node: parseInt(useNodes.getState().curNode, 10),
             root,
             path: `~/Downloads/${name}`,
           }),

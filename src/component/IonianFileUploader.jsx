@@ -84,7 +84,7 @@ const useIonianFileUploaderStore = create((set, get) => ({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         path: get().name,
-        node: useNodes.getState().getCurrentNode(),
+        node: parseInt(useNodes.getState().curNode, 10),
       }),
     });
   },
