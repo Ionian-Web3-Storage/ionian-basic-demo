@@ -32,6 +32,9 @@ const useIonianFileUploaderStore = create((set, get) => ({
   upsertFileFn: null,
   setUpsertFile: (fn) => set({ upsertFileFn: fn }),
 
+  uppyResetFn: null,
+  setUppyResetFn: (fn) => set({ uppyResetFn: fn }),
+
   getFileForList: () => {
     const { state, name, root, size, date, segments, fileIonianStatus } = get();
     return { state, name, root, size, date, segments, fileIonianStatus };
@@ -86,6 +89,7 @@ const useIonianFileUploaderStore = create((set, get) => ({
   fileUploaded: () => {
     set({ fileIonianStatus: "uploaded", state: 5 });
     get().upsertFileFn(get().getFileForList());
+    get().reset();
   },
 
   setFileStatus: (status) => {
@@ -126,6 +130,7 @@ const useIonianFileUploaderStore = create((set, get) => ({
 
   reset: () => {
     if (get().updateStatusInterval) clearInterval(get().updateStatusInterval);
+    get().uppyResetFn();
     set({
       state: 0,
       name: null,
@@ -147,11 +152,12 @@ export function useIonianFileUploader() {
     if (provider) store.setProvider(provider);
   }, [provider]);
 
+  const { fileName, reset } = useFileUploader();
+
   useEffectOnce(() => {
     store.setUpsertFile(fileList.upsertFile);
+    store.setUppyResetFn(reset);
   });
-
-  const { fileName, reset } = useFileUploader();
 
   useEffect(() => {
     if (fileName) store.addFile(fileName);
