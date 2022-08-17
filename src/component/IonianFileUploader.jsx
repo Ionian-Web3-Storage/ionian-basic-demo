@@ -11,6 +11,11 @@ import { useChainIsOk, connect } from "./WalletButton";
 const { useProvider } = hooks;
 const contract = new Contract(CONTRACT_ADDRESS, CONTRACT_ABI);
 
+const DEBUGING = localStorage.getItem("________DEBUGING");
+
+window.ooon = () => localStorage.setItem("________DEBUGING", "true");
+window.oooff = () => localStorage.removeItem("________DEBUGING");
+
 // state
 // 0 init
 // 1 file added, getting merkle root
@@ -71,7 +76,7 @@ const useIonianFileUploaderStore = create((set, get) => ({
     useFileListStore.getState().upsertFile(get().getFileForList());
   },
 
-  fileStatusAvaliable: () => {
+  fileStatusAvailable: () => {
     set({ fileIonianStatus: "available", state: 4 });
     useFileListStore.getState().upsertFile(get().getFileForList());
     fetch(`${CLIENT_ENDPOINT}/local/upload`, {
@@ -94,11 +99,11 @@ const useIonianFileUploaderStore = create((set, get) => ({
     const curStatus = get().fileIonianStatus;
     if (status === "unavailable") return set({ fileIonianStatus: status });
     if (
-      curStatus === "unavailable" &&
+      (curStatus === "unavailable" || !curStatus) &&
       status === "available" &&
       get().state === 3
     )
-      return get().fileStatusAvaliable();
+      return get().fileStatusAvailable();
     if (
       curStatus === "available" &&
       status === "finalized" &&
@@ -163,18 +168,43 @@ export function useIonianFileUploader() {
 }
 
 export function IonianFileUploader(props) {
-  useIonianFileUploader();
+  const store = useIonianFileUploader();
   const chainOK = useChainIsOk();
   return (
-    <FileUploader
-      {...props}
-      onClick={(e) => {
-        if (!chainOK) {
-          connect();
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      }}
-    />
+    <>
+      <FileUploader
+        {...props}
+        onClick={(e) => {
+          if (!chainOK) {
+            connect();
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
+      />
+      {DEBUGING && (
+        <section>
+          <p>-----------------------DEBUG INFO-----------------------</p>
+          <p>
+            // state <br />
+            // 0 init <br />
+            // 1 file added, getting merkle root <br />
+            // 2 got merkle root, request sending tx <br />
+            // 3 tx sent, waiting for confirmation <br />
+            // 4 tx confirmed, uploading file <br />
+            // 5 file uploaded <br />
+          </p>
+          <ul className="p-4 ml-16">
+            <li>state: {store.state}</li>
+            <li>name: {store.name}</li>
+            <li>root: {store.root}</li>
+            <li>size: {store.size}</li>
+            <li>segments: {store.segments}</li>
+            <li>fileIonianStatus: {store.fileIonianStatus}</li>
+          </ul>
+          <p>-----------------------DEBUG INFO-----------------------</p>
+        </section>
+      )}
+    </>
   );
 }
