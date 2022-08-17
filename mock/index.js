@@ -47,7 +47,7 @@ app.get("/local/status", (req, res) => {
 app.post("/local/upload", (req, res) => {
   res.send("ok");
 });
-app.get("/local/download", (req, res) => {
+app.post("/local/download", (req, res) => {
   res.send("ok");
 });
 

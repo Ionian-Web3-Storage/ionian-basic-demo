@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import cx from "classnames";
 import * as Accordion from "@radix-ui/react-accordion";
 import { useEffect } from "react";
+import { TARGET_CHAIN } from "../consts";
 
 import { CLIENT_ENDPOINT } from "../consts";
 
@@ -106,6 +107,44 @@ function Download({ name, root, className, ...props }) {
   );
 }
 
+function FileStatus({ state, className, ...props }) {
+  return (
+    <Accordion.Content {...props} className={cx(className)}>
+      {state >= 3 && (
+        <ul className="pl-8">
+          <li className="flex flex-row pb-2">
+            {state === 3 && <img src="./running.svg" />}
+            {state !== 3 && <img src="./check.svg" />}
+            <span className="ml-4">{`Indexing on  Layer1 (${TARGET_CHAIN.chainName})`}</span>
+          </li>
+          {state >= 4 && (
+            <li className="flex flex-col py-1">
+              <div className="flex flex-row">
+                {state === 4 && <img src="./running.svg" />}
+                {state !== 4 && <img src="./check.svg" />}
+                <span className="ml-4">
+                  Sync Layer1 data to Layer2 (IONIAN)
+                </span>
+              </div>
+              {state === 4 && (
+                <span className="ml-10 text-sm text-#979797">
+                  Uploading Files
+                </span>
+              )}
+            </li>
+          )}
+          {state === 5 && (
+            <li className="flex flex-row py-1">
+              <img src="./check.svg" />
+              <span className="ml-4">Uploaded</span>
+            </li>
+          )}
+        </ul>
+      )}
+    </Accordion.Content>
+  );
+}
+
 export function OneFile({
   idx,
   state,
@@ -122,41 +161,60 @@ export function OneFile({
     if (state !== 5) setExpanded(idx);
   }, [state]);
   return (
-    <Accordion.Item {...props} className={cx(className, "relative")}>
-      <div className="my-2 grid grid-flow-row-dense grid-cols-24 mb-4">
-        <div className="col-span-2">
-          {state === 5 && <img src="./check.svg" />}
-          {state !== 5 && <img src="./loading.svg" />}
+    <Accordion.Item
+      {...props}
+      className={cx(className, "relative")}
+      value={idx + ""}
+    >
+      <Accordion.Header className="mb-4 py-2">
+        <div className="w-full grid grid-flow-row-dense grid-cols-24 justify-items-start">
+          <div className="col-span-2 justify-self-center">
+            {state === 5 && <img src="./check.svg" />}
+            {state !== 5 && <img src="./loading.svg" />}
+          </div>
+          <div className="col-span-8">
+            <DateTime timeStamp={date} />
+          </div>
+          <MerkleRoot className="col-span-10">{root}</MerkleRoot>
+          <div className="col-span-3 uppercase">{shortenBytes(size)}</div>
+          <div className="col-span-1">
+            {state === 5 && <Download root={root} name={name} />}
+          </div>
         </div>
-        <div className="col-span-8">
-          <DateTime timeStamp={date} />
-        </div>
-        <MerkleRoot className="col-span-10">{root}</MerkleRoot>
-        <div className="col-span-3 uppercase">{shortenBytes(size)}</div>
-        <div className="col-span-1">
-          {state === 5 && <Download root={root} name={name} />}
-        </div>
-      </div>
+        <Accordion.Trigger
+          className="absolute w-90% h-full -translate-y-100%"
+          onClick={() => setExpanded(idx)}
+        />
+      </Accordion.Header>
+      <FileStatus state={state} />
     </Accordion.Item>
   );
 }
 
 export function FileList({ className, ...props }) {
   const { files } = useFileList();
+  const { expanded } = useFileList();
   return (
-    <div className="w-70% translate-x-22.5% b-px b-black py-8 px-4">
-      <div className="grid grid-flow-row-dense grid-cols-24 mb-4 justify-items-start content-center items-center justify-center font-bold text-lg">
-        <div className="col-span-2" />
-        <div className="col-span-8">Date</div>
-        <div className="col-span-10">Merkle Root</div>
-        <div className="col-span-3">File Size</div>
-        <div className="col-span-1" />
+    <div
+      className={cx(
+        className,
+        "w-70% m-auto border border-#fafafa p-2 bg-#FAFAFA"
+      )}
+    >
+      <div className="border border-#dfdfdf border-dashed  py-8 px-4">
+        <div className="grid grid-flow-row-dense grid-cols-24 mb-4 justify-items-start content-center items-center justify-center font-bold text-lg">
+          <div className="col-span-2" />
+          <div className="col-span-8">Date</div>
+          <div className="col-span-10">Merkle Root</div>
+          <div className="col-span-3">File Size</div>
+          <div className="col-span-1" />
+        </div>
+        <Accordion.Root {...props} type="single" value={expanded + ""}>
+          {files.map((file, idx) => (
+            <OneFile key={idx} idx={idx} {...file} />
+          ))}
+        </Accordion.Root>
       </div>
-      <Accordion.Root {...props} className={cx(className)}>
-        {files.map((file, idx) => (
-          <OneFile key={idx} idx={idx} {...file} />
-        ))}
-      </Accordion.Root>
     </div>
   );
 }

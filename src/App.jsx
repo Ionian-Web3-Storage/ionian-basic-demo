@@ -7,7 +7,7 @@ function App() {
     <>
       <Nav />
       <IonianFileUploader />
-      <FileList />
+      <FileList className="mt-8" />
     </>
   );
 }

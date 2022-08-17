@@ -171,33 +171,5 @@ export function useIonianFileUploader() {
 }
 
 export function IonianFileUploader(props) {
-  const store = useIonianFileUploader();
-
-  return (
-    <>
-      <FileUploader {...props} />
-
-      <section>
-        <p>-----------------------DEBUG INFO-----------------------</p>
-        <p>
-          // state <br />
-          // 0 init <br />
-          // 1 file added, getting merkle root <br />
-          // 2 got merkle root, request sending tx <br />
-          // 3 tx sent, waiting for confirmation <br />
-          // 4 tx confirmed, uploading file <br />
-          // 5 file uploaded <br />
-        </p>
-        <ul className="p-4 ml-16">
-          <li>state: {store.state}</li>
-          <li>name: {store.name}</li>
-          <li>root: {store.root}</li>
-          <li>size: {store.size}</li>
-          <li>segments: {store.segments}</li>
-          <li>fileIonianStatus: {store.fileIonianStatus}</li>
-        </ul>
-        <p>-----------------------DEBUG INFO-----------------------</p>
-      </section>
-    </>
-  );
+  return <FileUploader {...props} />;
 }
