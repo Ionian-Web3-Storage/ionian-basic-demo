@@ -5,7 +5,7 @@ import cx from "classnames";
 import { useEffectOnce } from "react-use";
 import { useMemo } from "react";
 
-export const useNodes = create((set) => ({
+export const useNodes = create((set, get) => ({
   nodes: [],
   curNode: "0",
   getCurrentNode: () => get().nodes[parseInt(get().curNode, 10)],
