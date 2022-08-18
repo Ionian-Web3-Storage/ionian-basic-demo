@@ -9,6 +9,17 @@ import { useHoverDirty } from "react-use";
 const chainList = [
   TARGET_CHAIN,
   {
+    chainName: "Polygon Mumbai",
+    chainId: 71,
+    rpcUrls: "https://rpc.ankr.com/polygon_mumbai",
+    blockExplorerUrls: ["https://mumbai.polygonscan.com"],
+    nativeCurrency: {
+      symbol: "MATIC",
+      name: "Matic",
+      decimals: 18,
+    },
+  },
+  {
     chainName: "Ethereum Ropsten",
     chainId: 3,
     rpcUrls: "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
