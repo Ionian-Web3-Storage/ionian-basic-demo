@@ -109,7 +109,8 @@ function Download({ name, root, className, ...props }) {
           body: JSON.stringify({
             node: parseInt(useNodes.getState().curNode, 10),
             root,
-            path: `~/Downloads/${name}`,
+            /* path: `~/Downloads/${name}`, */
+            path: name,
           }),
         })
       }
