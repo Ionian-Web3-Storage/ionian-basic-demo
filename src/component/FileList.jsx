@@ -105,6 +105,7 @@ function Download({ name, root, className, ...props }) {
       onClick={() =>
         fetch(`${CLIENT_ENDPOINT}/local/download`, {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           mode: "cors",
           body: JSON.stringify({
             node: parseInt(useNodes.getState().curNode, 10),
