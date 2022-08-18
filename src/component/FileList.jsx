@@ -2,10 +2,11 @@ import create from "zustand";
 import { persist } from "zustand/middleware";
 import cx from "classnames";
 import * as Accordion from "@radix-ui/react-accordion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { TARGET_CHAIN } from "../consts";
 import { useCopyToClipboard } from "react-use";
 import { useNodes } from "./NodeList";
+import * as Toast from "@radix-ui/react-toast";
 
 import { CLIENT_ENDPOINT } from "../consts";
 
@@ -98,26 +99,40 @@ function MerkleRoot({ children, className, ...props }) {
 }
 
 function Download({ name, root, className, ...props }) {
+  const [open, setOpen] = useState(false);
   return (
-    <button
-      {...props}
-      className={cx(className, "block")}
-      onClick={() =>
-        fetch(`${CLIENT_ENDPOINT}/local/download`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          mode: "cors",
-          body: JSON.stringify({
-            node: parseInt(useNodes.getState().curNode, 10),
-            root,
-            /* path: `~/Downloads/${name}`, */
-            path: name,
-          }),
-        })
-      }
-    >
-      <img className="w-6" src="./download.svg" />
-    </button>
+    <>
+      <button
+        {...props}
+        className={cx(className, "block")}
+        onClick={() =>
+          fetch(`${CLIENT_ENDPOINT}/local/download`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            mode: "cors",
+            body: JSON.stringify({
+              node: parseInt(useNodes.getState().curNode, 10),
+              root,
+              /* path: `~/Downloads/${name}`, */
+              path: name,
+            }),
+          }).then(() => {
+            setOpen(true);
+            setTimeout(() => setOpen(false), 3000);
+          })
+        }
+      >
+        <img className="w-6" src="./download.svg" />
+      </button>
+      <Toast.Root open={open} className="border border-#fafafa p-2 bg-#FAFAFA">
+        <div className="border border-#dfdfdf border-dashed py-4 px-4 flex flex-row">
+          <Toast.Title>Download Finished!</Toast.Title>
+          <Toast.Action altText="OK" className="ml-2 font-bold text-#2e39ff">
+            <button onClick={() => setOpen(false)}>OK</button>
+          </Toast.Action>
+        </div>
+      </Toast.Root>
+    </>
   );
 }
 
@@ -215,7 +230,7 @@ export function FileList({ className, ...props }) {
         "w-70% m-auto border border-#fafafa p-2 bg-#FAFAFA"
       )}
     >
-      <div className="border border-#dfdfdf border-dashed  py-8 px-4">
+      <div className="border border-#dfdfdf border-dashed py-8 px-4">
         <div className="grid grid-flow-row-dense grid-cols-24 mb-4 justify-items-start content-center items-center justify-center font-bold text-lg">
           <div className="col-span-2" />
           <div className="col-span-8">Date</div>
